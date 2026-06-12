@@ -430,10 +430,17 @@ export class CarWordsGame {
 
   /** @param {number} dt */
   updateCamera(dt) {
-    const shake = this.state === GameState.CRASHING ? (Math.random() - 0.5) * 0.5 : 0;
-    const target = new THREE.Vector3(shake, 6, this.car.position.z + 14);
+    // 30° left-side view: camera sits left-rear of the car, elevated, so the
+    // car occupies the left-centre of the frame and the road stretches right.
+    const shake = this.state === GameState.CRASHING ? (Math.random() - 0.5) * 0.4 : 0;
+    const target = new THREE.Vector3(
+      -11 + shake,   // offset left
+      9,             // elevation gives ~30° pitch
+      this.car.position.z + 12
+    );
     this.camera.position.lerp(target, 1 - Math.exp(-4 * dt));
-    this.camera.lookAt(0, 1.5, this.car.position.z - 8);
+    // Look slightly right of centre so the road ahead is visible on the right
+    this.camera.lookAt(2, 1, this.car.position.z - 6);
   }
 
   resize() {

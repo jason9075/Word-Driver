@@ -5,26 +5,40 @@ import { createQuizPanel } from './quiz.js';
 import { isSoundEnabled, setSoundEnabled, speak } from './speech.js';
 import { getBest, recordScore, unlockVehicle } from './storage.js';
 import { VEHICLES } from './vehicles.js';
-import { buildOptions, createWordCycler } from './words.js';
+import { DIFFICULTIES, buildOptions, createWordCycler } from './words.js';
 
 const CRASH_SCREEN_MS = 2400;
 const CONFETTI_COUNT = 36;
 const CELEBRATE_EVERY = 5;
 
 const canvas = document.getElementById('canvas');
-const hud = document.getElementById('hud');
-const hudBest = document.getElementById('hud-best');
 const soundToggle = document.getElementById('sound-toggle');
 const crashScreen = document.getElementById('crash-screen');
 const winScreen = document.getElementById('win-screen');
 const unlockMessage = document.getElementById('unlock-message');
 const menuButton = document.getElementById('menu-button');
 
-let difficulty = 'easy';
+// Left-side status panel elements
+const statusVehicle = document.getElementById('status-vehicle');
+const statusDifficulty = document.getElementById('status-difficulty');
+const statusStreak = document.getElementById('status-streak');
+const statusBest = document.getElementById('status-best');
+const statusProgressBar = document.getElementById('status-progress-bar');
 
-function updateHud(score) {
-  hud.textContent = `⭐ ${score} / ${STREAK_GOAL}`;
-  hudBest.textContent = `🏆 ${getBest(difficulty)}`;
+let difficulty = 'easy';
+let selectedVehicleEmoji = '🚗';
+
+/** @param {number} score */
+function updateStatus(score) {
+  statusStreak.textContent = `${score} / ${STREAK_GOAL}`;
+  statusBest.textContent = `🏆 ${getBest(difficulty)}`;
+  statusProgressBar.style.width = `${(score / STREAK_GOAL) * 100}%`;
+}
+
+/** @param {string} diff @param {string} emoji */
+function setStatusMeta(diff, emoji) {
+  statusDifficulty.textContent = DIFFICULTIES[diff].label;
+  statusVehicle.textContent = emoji;
 }
 
 const quiz = createQuizPanel({
@@ -42,7 +56,7 @@ const game = new CarWordsGame(canvas, createWordCycler(difficulty), {
     quiz.show(entry, buildOptions(entry, difficulty));
   },
   onProgress(score) {
-    updateHud(score);
+    updateStatus(score);
     if (score > 0 && score < STREAK_GOAL && score % CELEBRATE_EVERY === 0) {
       speak(`Hooray! ${score} stars!`);
       dropConfetti();
@@ -50,16 +64,18 @@ const game = new CarWordsGame(canvas, createWordCycler(difficulty), {
   },
   onCrashDone(score) {
     recordScore(difficulty, score);
+    updateStatus(score);
     crashScreen.hidden = false;
     speak('Oops! Let us try again!');
     setTimeout(() => {
       crashScreen.hidden = true;
-      updateHud(0);
+      updateStatus(0);
       game.reset(true);
     }, CRASH_SCREEN_MS);
   },
   onWin(score) {
     recordScore(difficulty, score);
+    updateStatus(score);
     const reward = VEHICLES.find((v) => v.unlockedBy === difficulty);
     const newUnlock = reward ? unlockVehicle(reward.id) : false;
     unlockMessage.hidden = !newUnlock;
@@ -75,15 +91,19 @@ const game = new CarWordsGame(canvas, createWordCycler(difficulty), {
 const menu = createMenu({
   onStart(selectedDifficulty, vehicleId) {
     difficulty = selectedDifficulty;
+    const vehicle = VEHICLES.find((v) => v.id === vehicleId);
+    selectedVehicleEmoji = vehicle ? vehicle.emoji : '🚗';
+    setStatusMeta(difficulty, selectedVehicleEmoji);
     game.setVehicle(vehicleId);
     game.setWordSource(createWordCycler(difficulty));
-    updateHud(0);
+    updateStatus(0);
     speak('Let us go!');
     game.reset(true);
   },
 });
 menu.show();
-updateHud(0);
+setStatusMeta(difficulty, selectedVehicleEmoji);
+updateStatus(0);
 
 menuButton.addEventListener('click', () => {
   winScreen.hidden = true;

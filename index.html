@@ -8,17 +8,33 @@
 </head>
 <body>
 
+  <!-- Minimal top-right toolbar -->
   <div id="toolbar" aria-label="Game controls">
     <span id="info">🚗 Car Words</span>
-    <span id="hud" aria-live="polite">⭐ 0 / 30</span>
-    <span id="hud-best">🏆 0</span>
     <button id="sound-toggle" type="button">🔊 Sound: On</button>
   </div>
 
+  <!-- Left-side status panel -->
+  <aside id="car-status" aria-label="Player status">
+    <div id="status-vehicle" class="status-vehicle">🚗</div>
+    <div id="status-difficulty" class="status-badge">Easy</div>
+    <div class="status-row">
+      <span class="status-label">Streak</span>
+      <span id="status-streak" class="status-value streak-value">0 / 30</span>
+    </div>
+    <div class="status-progress-track" aria-hidden="true">
+      <div id="status-progress-bar" class="status-progress-bar"></div>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Best</span>
+      <span id="status-best" class="status-value best-value">🏆 0</span>
+    </div>
+  </aside>
+
   <canvas id="canvas"></canvas>
 
-  <!-- Quiz panel -->
-  <div id="quiz" class="overlay" hidden>
+  <!-- Quiz panel — floats on the right, no background overlay -->
+  <div id="quiz" hidden>
     <div class="quiz-card">
       <p class="quiz-question">What is this?</p>
       <div id="quiz-emoji" class="quiz-emoji">🐶</div>

@@ -27,47 +27,26 @@ canvas {
   display: block;
 }
 
-/* ── Toolbar ─────────────────────────────────────────────────────── */
+/* ── Top-right toolbar ───────────────────────────────────────────── */
 #toolbar {
   position: fixed;
   top: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 1.5rem;
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   align-items: center;
-  padding: 0.6rem 1.3rem;
+  padding: 0.5rem 1rem;
   border: 4px solid var(--sun);
   border-radius: 999px;
   background: var(--cream);
-  box-shadow: 0 6px 0 rgba(58, 56, 69, 0.18);
+  box-shadow: 0 5px 0 rgba(58, 56, 69, 0.15);
   z-index: 20;
 }
 
 #info {
   color: var(--coral);
   font-weight: bold;
-  font-size: 1.1rem;
-}
-
-#hud {
-  color: var(--ink);
-  background: var(--sun);
-  border-radius: 999px;
-  padding: 0.25rem 0.9rem;
-  font-weight: bold;
-  font-size: 1.1rem;
-  min-width: 4.5rem;
-  text-align: center;
-}
-
-#hud-best {
-  color: var(--ink);
-  background: #f3e8ff;
-  border-radius: 999px;
-  padding: 0.25rem 0.9rem;
-  font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 #toolbar button {
@@ -77,7 +56,7 @@ canvas {
   border-radius: 999px;
   background: #eafbe7;
   color: var(--ink);
-  padding: 0.4rem 0.9rem;
+  padding: 0.35rem 0.8rem;
   cursor: pointer;
   transition: transform 0.15s ease;
 }
@@ -86,7 +65,87 @@ canvas {
   transform: scale(1.06);
 }
 
-/* ── Full-screen overlays ────────────────────────────────────────── */
+/* ── Left-side status panel ──────────────────────────────────────── */
+#car-status {
+  position: fixed;
+  left: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 1rem 0.8rem;
+  background: var(--cream);
+  border: 4px solid var(--sun);
+  border-radius: 24px;
+  box-shadow: 0 8px 0 rgba(58, 56, 69, 0.15);
+  z-index: 20;
+}
+
+.status-vehicle {
+  font-size: 3rem;
+  line-height: 1;
+  animation: wiggle 2.5s ease-in-out infinite;
+}
+
+.status-badge {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #fff;
+  background: var(--berry);
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+}
+
+.status-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  width: 100%;
+}
+
+.status-label {
+  font-size: 0.72rem;
+  font-weight: bold;
+  color: #9a8f7e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-value {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.streak-value {
+  color: var(--ink);
+}
+
+.best-value {
+  color: var(--berry);
+}
+
+/* streak fill bar */
+.status-progress-track {
+  width: 100%;
+  height: 10px;
+  background: #e8e2d4;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.status-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--mint) 0%, #3dc96b 100%);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+/* ── Full-screen overlays (start / crash / win) ──────────────────── */
 .overlay {
   position: fixed;
   inset: 0;
@@ -230,47 +289,63 @@ canvas {
   cursor: not-allowed;
 }
 
-/* ── Quiz panel ──────────────────────────────────────────────────── */
+/* ── Quiz panel — right-side float, no overlay ───────────────────── */
+#quiz {
+  position: fixed;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 25;
+  /* slide in from the right */
+  animation: slide-in-right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#quiz[hidden] {
+  display: none;
+}
+
 .quiz-card {
   text-align: center;
   background: var(--cream);
   color: var(--ink);
   border: 6px solid var(--berry);
   border-radius: 36px;
-  padding: 2rem 3rem;
-  box-shadow: 0 12px 0 rgba(58, 56, 69, 0.2);
-  animation: bounce-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding: 1.4rem 1.6rem;
+  box-shadow:
+    0 12px 0 rgba(58, 56, 69, 0.2),
+    0 0 0 6px rgba(255, 248, 231, 0.6);
+  width: min(280px, 38vw);
 }
 
 .quiz-question {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: bold;
   color: var(--berry);
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.5rem;
 }
 
 .quiz-emoji {
-  font-size: 8rem;
+  font-size: 5rem;
   line-height: 1.2;
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.9rem;
   animation: wiggle 2s ease-in-out infinite;
 }
 
 .quiz-options {
   display: grid;
-  gap: 1rem;
+  gap: 0.7rem;
 }
 
 .option-button {
   font: inherit;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: bold;
-  padding: 0.85rem 2rem;
-  border-radius: 24px;
+  padding: 0.7rem 1rem;
+  border-radius: 20px;
   color: var(--ink);
   cursor: pointer;
   transition: transform 0.15s ease;
-  box-shadow: 0 6px 0 rgba(58, 56, 69, 0.18);
+  box-shadow: 0 5px 0 rgba(58, 56, 69, 0.18);
 }
 
 .option-button:nth-child(1) {
@@ -322,30 +397,27 @@ canvas {
 
 /* ── Animations ──────────────────────────────────────────────────── */
 @keyframes bounce-in {
-  from {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateY(-50%) translateX(120%); opacity: 0; }
+  to   { transform: translateY(-50%) translateX(0);    opacity: 1; }
 }
 
 @keyframes wiggle {
   0%, 100% { transform: rotate(-4deg); }
-  50% { transform: rotate(4deg); }
+  50%       { transform: rotate(4deg); }
 }
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-10px); }
-  50% { transform: translateX(10px); }
-  75% { transform: translateX(-6px); }
+  25%       { transform: translateX(-10px); }
+  50%       { transform: translateX(10px); }
+  75%       { transform: translateX(-6px); }
 }
 
 @keyframes fall {
-  to {
-    transform: translateY(110vh) rotate(360deg);
-  }
+  to { transform: translateY(110vh) rotate(360deg); }
 }
