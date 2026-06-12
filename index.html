@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Car Words — Drive &amp; Learn</title>
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+
+  <div id="toolbar" aria-label="Game controls">
+    <span id="info">🚗 Car Words</span>
+    <span id="hud" aria-live="polite">⭐ 0 / 30</span>
+    <span id="hud-best">🏆 0</span>
+    <button id="sound-toggle" type="button">🔊 Sound: On</button>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <!-- Quiz panel -->
+  <div id="quiz" class="overlay" hidden>
+    <div class="quiz-card">
+      <p class="quiz-question">What is this?</p>
+      <div id="quiz-emoji" class="quiz-emoji">🐶</div>
+      <div id="quiz-options" class="quiz-options"></div>
+    </div>
+  </div>
+
+  <!-- Start screen / menu -->
+  <div id="start-screen" class="overlay">
+    <div class="big-card">
+      <div class="big-emoji">🚗💨</div>
+      <h1>Car Words</h1>
+      <p>Answer 30 words in a row to win!</p>
+      <p class="menu-label">Difficulty</p>
+      <div id="difficulty-options" class="menu-row"></div>
+      <p class="menu-label">Your Car</p>
+      <div id="vehicle-options" class="menu-row"></div>
+      <button id="start-button" class="big-button" type="button">▶ Start!</button>
+    </div>
+  </div>
+
+  <!-- Crash screen -->
+  <div id="crash-screen" class="overlay" hidden>
+    <div class="big-card crash-card">
+      <div class="big-emoji">💥😢</div>
+      <h1>Oops!</h1>
+      <p id="crash-message">Let's try again from the start!</p>
+    </div>
+  </div>
+
+  <!-- Win screen -->
+  <div id="win-screen" class="overlay" hidden>
+    <div class="big-card win-card">
+      <div class="big-emoji">🏆🎉</div>
+      <h1>You did it!</h1>
+      <p>30 words in a row!</p>
+      <p id="unlock-message" class="unlock-message" hidden></p>
+      <button id="menu-button" class="big-button" type="button">🏠 Menu</button>
+    </div>
+  </div>
+
+</body>
+</html>
