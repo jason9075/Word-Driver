@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/Car-words/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/Word-Driver/' : '/',
   server: {
     port: 8080,
   },
