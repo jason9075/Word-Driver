@@ -65,6 +65,11 @@ canvas {
   transform: scale(1.06);
 }
 
+#back-to-menu {
+  border-color: var(--coral);
+  background: #ffe9e3;
+}
+
 /* ── Left-side status panel ──────────────────────────────────────── */
 #car-status {
   position: fixed;

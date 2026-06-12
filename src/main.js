@@ -13,6 +13,7 @@ const CELEBRATE_EVERY = 5;
 
 const canvas = document.getElementById('canvas');
 const soundToggle = document.getElementById('sound-toggle');
+const backToMenuButton = document.getElementById('back-to-menu');
 const crashScreen = document.getElementById('crash-screen');
 const winScreen = document.getElementById('win-screen');
 const unlockMessage = document.getElementById('unlock-message');
@@ -107,6 +108,13 @@ updateStatus(0);
 
 menuButton.addEventListener('click', () => {
   winScreen.hidden = true;
+  game.reset(false);
+  menu.show();
+});
+
+backToMenuButton.addEventListener('click', () => {
+  quiz.hide();
+  crashScreen.hidden = true;
   game.reset(false);
   menu.show();
 });
