@@ -1,11 +1,13 @@
 import { speak } from './speech.js';
+import { playCorrect, playWrong } from './sounds.js';
 
 const CORRECT_DELAY_MS = 1100;
 const WRONG_DELAY_MS = 1600;
 
 /**
  * Controls the emoji quiz panel. Shows a big emoji and three word buttons;
- * after a pick it highlights the answer, speaks it, then reports the result.
+ * after a pick it highlights the answer, plays a sound effect, speaks the
+ * word, then reports the result.
  *
  * @param {{onResult: (correct: boolean) => void}} callbacks
  * @returns {{show: (entry: import('./words.js').WordEntry, options: string[]) => void, hide: () => void}}
@@ -40,11 +42,13 @@ export function createQuizPanel(callbacks) {
 
         if (correct) {
           button.classList.add('correct');
+          playCorrect();
           speak(`${entry.word}! Great job!`);
         } else {
           button.classList.add('wrong');
           const answerButton = buttons.find((b) => b.textContent === entry.word);
           if (answerButton) answerButton.classList.add('correct');
+          playWrong();
           speak(`Oops! It is ${entry.word}.`);
         }
 

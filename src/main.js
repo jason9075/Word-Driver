@@ -5,6 +5,7 @@ import { createQuizPanel } from './quiz.js';
 import { isSoundEnabled, setSoundEnabled, speak } from './speech.js';
 import { getBest, recordScore, unlockVehicle } from './storage.js';
 import { VEHICLES } from './vehicles.js';
+import { playWin } from './sounds.js';
 import { DIFFICULTIES, buildOptions, createWordCycler } from './words.js';
 
 const CRASH_SCREEN_MS = 2400;
@@ -84,6 +85,7 @@ const game = new CarWordsGame(canvas, createWordCycler(difficulty), {
       unlockMessage.textContent = `${reward.emoji} New car unlocked: ${reward.name}!`;
     }
     winScreen.hidden = false;
+    playWin();
     speak(newUnlock ? `You did it! You got a new ${reward.name}!` : 'You did it! Hooray!');
     dropConfetti();
   },
