@@ -139,8 +139,10 @@ export class CarWordsGame {
     const dashMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.lane });
     for (let i = 0; i < DASH_COUNT; i += 1) {
       const dash = new THREE.Mesh(dashGeometry, dashMaterial);
+      const dz = 30 - i * DASH_SPACING;
       dash.rotation.x = -Math.PI / 2;
-      dash.position.set(0, 0.02, 30 - i * DASH_SPACING);
+      dash.position.set(0, 0.02, dz);
+      dash.userData.initialZ = dz;
       this.scene.add(dash);
       this.dashes.push(dash);
     }
@@ -240,11 +242,9 @@ export class CarWordsGame {
         leaves.position.y = 3.6;
         tree.add(trunk, leaves);
         tree.scale.setScalar(0.8 + Math.random() * 0.7);
-        tree.position.set(
-          side * (9 + Math.random() * 14),
-          0,
-          -10 - i * TREE_SPACING + Math.random() * 8
-        );
+        const tz = -10 - i * TREE_SPACING + Math.random() * 8;
+        tree.position.set(side * (9 + Math.random() * 14), 0, tz);
+        tree.userData.initialZ = tz;
         this.scene.add(tree);
         this.trees.push(tree);
       }
@@ -260,7 +260,9 @@ export class CarWordsGame {
         puff.position.set(j * 1.8 - 1.8, Math.random() * 0.5, Math.random());
         cloud.add(puff);
       }
-      cloud.position.set((Math.random() - 0.5) * 120, 20 + Math.random() * 14, -i * CLOUD_SPACING);
+      const cz = -i * CLOUD_SPACING;
+      cloud.position.set((Math.random() - 0.5) * 120, 20 + Math.random() * 14, cz);
+      cloud.userData.initialZ = cz;
       this.scene.add(cloud);
       this.clouds.push(cloud);
     }
@@ -300,6 +302,13 @@ export class CarWordsGame {
     this.speed = 0;
     this.car.position.set(0, 0, 0);
     this.car.rotation.set(0, 0, 0);
+
+    // Restore decor back to their initial positions so they're visible again
+    // after recycleScenery has moved them far down the negative-z axis.
+    for (const tree of this.trees)   tree.position.z = tree.userData.initialZ;
+    for (const cloud of this.clouds) cloud.position.z = cloud.userData.initialZ;
+    for (const dash of this.dashes)  dash.position.z  = dash.userData.initialZ;
+
     this.callbacks.onProgress(0);
     this.state = autoStart ? GameState.DRIVING : GameState.IDLE;
   }
