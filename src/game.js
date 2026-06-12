@@ -37,6 +37,13 @@ const CLOUD_COUNT = 14;
 const CLOUD_SPACING = 40;
 const RECYCLE_MARGIN = 40;       // recycle decor once this far behind the car
 
+const FARMHOUSE_ROWS = 8;
+const FARMHOUSE_SPACING = 80;
+const WINDMILL_COUNT = 4;
+const WINDMILL_SPACING = 120;
+const SCORE_FARMHOUSE = 10;
+const SCORE_WINDMILL = 20;
+
 const PALETTE = Object.freeze({
   sky: 0x87ceeb,
   grass: 0x7cb96a,
@@ -224,6 +231,90 @@ export class CarWordsGame {
     return { group, entry: this.nextWord(), clearTime: 0 };
   }
 
+  /** @returns {THREE.Group} */
+  buildFarmhouse() {
+    const group = new THREE.Group();
+
+    const walls = new THREE.Mesh(
+      new THREE.BoxGeometry(4, 3.5, 4),
+      new THREE.MeshLambertMaterial({ color: 0xfaf0e6 })
+    );
+    walls.position.y = 1.75;
+    group.add(walls);
+
+    // Square-pyramid roof
+    const roof = new THREE.Mesh(
+      new THREE.CylinderGeometry(0, 3.2, 2.5, 4),
+      new THREE.MeshLambertMaterial({ color: 0xc0392b })
+    );
+    roof.rotation.y = Math.PI / 4;
+    roof.position.y = 4.75;
+    group.add(roof);
+
+    const door = new THREE.Mesh(
+      new THREE.BoxGeometry(1.0, 2.0, 0.15),
+      new THREE.MeshLambertMaterial({ color: 0x8b4513 })
+    );
+    door.position.set(0, 1.0, 2.08);
+    group.add(door);
+
+    const winGeo = new THREE.BoxGeometry(0.9, 0.9, 0.15);
+    const winMat = new THREE.MeshLambertMaterial({ color: 0x87ceeb });
+    for (const wx of [-1.4, 1.4]) {
+      const win = new THREE.Mesh(winGeo, winMat);
+      win.position.set(wx, 2.4, 2.08);
+      group.add(win);
+    }
+
+    return group;
+  }
+
+  /** @returns {THREE.Group} */
+  buildWindmill() {
+    const group = new THREE.Group();
+
+    const tower = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.5, 1.1, 9, 8),
+      new THREE.MeshLambertMaterial({ color: 0xd4c5a9 })
+    );
+    tower.position.y = 4.5;
+    group.add(tower);
+
+    const cap = new THREE.Mesh(
+      new THREE.ConeGeometry(1.2, 2, 8),
+      new THREE.MeshLambertMaterial({ color: 0x8b4513 })
+    );
+    cap.position.y = 10;
+    group.add(cap);
+
+    const hub = new THREE.Mesh(
+      new THREE.SphereGeometry(0.45, 8, 8),
+      new THREE.MeshLambertMaterial({ color: 0x444444 })
+    );
+    hub.position.set(0, 9, 0.65);
+    group.add(hub);
+
+    const bladeGroup = new THREE.Group();
+    bladeGroup.position.set(0, 9, 0.8);
+
+    const bladeColors = [0xe74c3c, 0xf1c40f, 0x2ecc71, 0x3498db];
+    for (let i = 0; i < 4; i += 1) {
+      const blade = new THREE.Mesh(
+        new THREE.BoxGeometry(0.5, 3.6, 0.18),
+        new THREE.MeshLambertMaterial({ color: bladeColors[i] })
+      );
+      blade.position.y = 1.8;
+      const arm = new THREE.Group();
+      arm.rotation.z = (i * Math.PI) / 2;
+      arm.add(blade);
+      bladeGroup.add(arm);
+    }
+    group.add(bladeGroup);
+    group.userData.bladeGroup = bladeGroup;
+
+    return group;
+  }
+
   buildDecor() {
     /** @type {THREE.Group[]} */
     this.trees = [];
@@ -265,6 +356,36 @@ export class CarWordsGame {
       cloud.userData.initialZ = cz;
       this.scene.add(cloud);
       this.clouds.push(cloud);
+    }
+
+    /** @type {THREE.Group[]} */
+    this.farmhouses = [];
+    for (let i = 0; i < FARMHOUSE_ROWS; i += 1) {
+      for (const side of [-1, 1]) {
+        const fh = this.buildFarmhouse();
+        const fz = -80 - i * FARMHOUSE_SPACING;
+        // Angle slightly toward the road so the corner faces the driver.
+        fh.rotation.y = side * -Math.PI / 4;
+        fh.position.set(side * 20, 0, fz);
+        fh.userData.initialZ = fz;
+        fh.visible = false;
+        this.scene.add(fh);
+        this.farmhouses.push(fh);
+      }
+    }
+
+    /** @type {THREE.Group[]} */
+    this.windmills = [];
+    for (let i = 0; i < WINDMILL_COUNT; i += 1) {
+      for (const side of [-1, 1]) {
+        const wm = this.buildWindmill();
+        const wz = -200 - i * WINDMILL_SPACING;
+        wm.position.set(side * 26, 0, wz);
+        wm.userData.initialZ = wz;
+        wm.visible = false;
+        this.scene.add(wm);
+        this.windmills.push(wm);
+      }
     }
   }
 
@@ -308,6 +429,8 @@ export class CarWordsGame {
     for (const tree of this.trees)   tree.position.z = tree.userData.initialZ;
     for (const cloud of this.clouds) cloud.position.z = cloud.userData.initialZ;
     for (const dash of this.dashes)  dash.position.z  = dash.userData.initialZ;
+    for (const fh of this.farmhouses) { fh.position.z = fh.userData.initialZ; fh.visible = false; }
+    for (const wm of this.windmills)  { wm.position.z = wm.userData.initialZ; wm.visible = false; }
 
     this.callbacks.onProgress(0);
     this.state = autoStart ? GameState.DRIVING : GameState.IDLE;
@@ -335,9 +458,19 @@ export class CarWordsGame {
     else if (this.state === GameState.CLEARING) this.updateClearing(dt);
     else if (this.state === GameState.CRASHING) this.updateCrashing(dt);
 
+    this.spinWindmills(dt);
     this.recycleScenery();
     this.updateCamera(dt);
     this.renderer.render(this.scene, this.camera);
+  }
+
+  /** @param {number} dt */
+  spinWindmills(dt) {
+    for (const wm of this.windmills) {
+      if (wm.visible && wm.userData.bladeGroup) {
+        wm.userData.bladeGroup.rotation.z += dt * 1.5;
+      }
+    }
   }
 
   /** @param {number} dt */
@@ -426,6 +559,22 @@ export class CarWordsGame {
     for (const cloud of this.clouds) {
       if (cloud.position.z > carZ + RECYCLE_MARGIN * 2) {
         cloud.position.z -= CLOUD_COUNT * CLOUD_SPACING;
+      }
+    }
+
+    const showFarmhouses = this.score >= SCORE_FARMHOUSE;
+    const showWindmills  = this.score >= SCORE_WINDMILL;
+
+    for (const fh of this.farmhouses) {
+      if (fh.visible !== showFarmhouses) fh.visible = showFarmhouses;
+      if (showFarmhouses && fh.position.z > carZ + RECYCLE_MARGIN) {
+        fh.position.z -= FARMHOUSE_ROWS * FARMHOUSE_SPACING;
+      }
+    }
+    for (const wm of this.windmills) {
+      if (wm.visible !== showWindmills) wm.visible = showWindmills;
+      if (showWindmills && wm.position.z > carZ + RECYCLE_MARGIN) {
+        wm.position.z -= WINDMILL_COUNT * WINDMILL_SPACING;
       }
     }
   }
